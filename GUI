@@ -1,0 +1,220 @@
+The following is code for the GUI that was created to interact with our robot.
+The GUI Displays relevant information that is sent from the Robot via Serial communication, Live video feed from the Robot's POV and can the exact location of the robot on google earth.
+
+import tkinter as tk
+from tkinter import ttk
+import cv2
+from PIL import Image, ImageTk
+import tkinter.font as font
+from tkinter.ttk import *
+from tkinter import *
+from tkinter import messagebox
+from tkinter.simpledialog import Dialog, Entry
+
+import vlc
+
+# Create a new window
+
+window = tk.Tk()
+window.title("Robot Control Center")
+window.geometry("800x600")
+window.config(bg="grey")
+MainFont = font.Font(size=30)
+
+# Create a label widget for the video feed
+label_video_feed = tk.Label(window, text="Live Video Feed")
+#Create a player for VLC
+instance = vlc.Instance('--no-audio')
+player = instance.media_player_new()
+# Create a menu bar
+menubar = tk.Menu(window)
+menubar.add_command(label="3D Chart", command=lambda: open_dialog())
+menubar.add_command(label="MAPS", command=lambda: print("Bitch"))
+window.config(menu=menubar)
+
+# Function to open camera and stream video
+def open_camera():
+    media = instance.media_new("dshow://")
+    player.set_media(media)
+    player.play()
+def exit_player():
+    player.stop()  # Stop the player
+    #window.destroy()  # Close the window   
+
+
+button_exit = tk.Button(window, text="Exit Camera", command=exit_player)
+button_exit.place(x= 200,y = 500)
+button_open_camera = tk.Button(window, text="Open Camera", command=open_camera)
+button_open_camera.place(x= 25,y = 500)
+
+
+
+
+    
+#longitude, latitude = GetCoordinates()
+#Function to update the coordinates
+# def Update_lbl():
+#     updated_long, updated_lat = get_updates()
+#     print(updated_long, updated_lat)
+#     label_longitude.config(text=updated_long)
+#     label_latitude.config(text=updated_lat)
+#     window.after(100,Update_lbl)
+# def get_updates():
+#     while True:
+#         updated_long1, updated_lat1 = GetCoordinates()
+#         return updated_long1,updated_lat1   
+#Labels for COM and Baudrate
+label_com = tk.Label(window, text="COM Port:", bg='#77C3EC', font=('Arial', 18))
+label_com.place(x = 350, y= 900)
+label_baud = tk.Label(window, text="Baudrate:", bg='#77C3EC', font=('Arial', 18))
+label_baud.place(x = 350, y= 850)
+#Dropdown for COM ports
+com_ports = ["COM1", "COM2", "COM3", "COM4", "COM5","COM6","COM7","COM8","COM9"]  # Example list of available COM ports
+combo_com = ttk.Combobox(window, values=com_ports)
+combo_com.place(x = 500, y= 910)
+#DROPdown for Baudrate
+baud_rates = ["9600", "115200", "230400","57600"]  # Example list of available baud rates
+combo_baud = ttk.Combobox(window, values=baud_rates)
+combo_baud.place(x = 500, y= 850)
+#Button to Confirm telemetry
+
+
+def get_COM():
+    if combo_com.get() =="":
+        messagebox.showinfo("Invalid", "ENTER A ACTUAL NUMBER DOOFUS")
+    else:
+        return combo_com.get()
+def get_Baud():
+    if combo_baud.get() == "":
+        messagebox.showinfo("Invalid", "ENTER A ACTUAL NUMBER DOOFUS")
+    else:
+        return combo_baud.get()
+# Create a button to get the selected values
+button_get_config = ttk.Button(window, text="Get Configuration", command=lambda:[get_Baud(),get_COM()])
+button_get_config.place(x = 650, y= 850)
+#CODE THAT WORKS
+def Update_lbl():
+    updated_long, updated_lat = Update_Coordinates()
+    updated_Alt = Get_Altitude()
+    updated_Speed = Get_Speed()
+    updated_Sat= Get_Sat()
+    Updated_Pitch, Updated_Roll = Get_PR()
+    label_Roll.config(text=Updated_Roll)
+    label_Pitch.config(text=Updated_Pitch)
+    label_Satelite.config(text=updated_Sat)
+    label_Altitude.config(text=updated_Alt)
+    label_Speed.config(text=updated_Speed)
+    label_longitude.config(text=updated_long)
+    label_latitude.config(text=updated_lat)
+    window.after(100,Update_lbl)
+from GET_INFO  import *
+from Loc_save import Loc_Update
+def Update_Coordinates():
+    while True:
+        updated_long1, updated_lat1 = GetCoordinates()
+        Loc_Update()
+        return updated_long1,updated_lat1 
+
+def Get_Altitude():
+    while True:
+        updated_Alt1 = GetAltitude()
+        return updated_Alt1
+def Get_Speed():
+    while True:
+        updated_Speed = GetSpeed()
+        return updated_Speed
+def Get_Sat():
+    while True:
+        updated_Sat= GetSat()
+        return updated_Sat
+def Get_PR():
+    while True:
+        Pitch, Roll= GetPR()
+        return Pitch, Roll
+
+
+       
+
+
+# Add a label for the latitude
+label_longitude = tk.Label(window, text='Data:', bg='#77C3EC', font=('Arial', 18))
+label_long1 = tk.Label(window, text='Longitude:', bg='#77C3EC', font=('Arial', 18))
+label_longitude.place(x=200, y=900)
+label_long1.place(x=25,y=900)
+# Add abel for the latitude
+label_latitude = tk.Label(window, text='Data', bg='#77C3EC',font=('Arial', 18))
+label_latitude.place(x=200, y=850)
+label_lat1 = tk.Label(window, text='Latitude:', bg='#77C3EC',font=('Arial', 18))
+label_lat1.place(x=25, y=850)
+label_Altitude = tk.Label(window, text='Data:', bg='#77C3EC', font=('Arial', 18))
+label_Altitude.place(x=200, y=800)
+label_Alt1 = tk.Label(window, text='Altitude', bg='#77C3EC', font=('Arial', 18))
+label_Alt1.place(x=25, y=800)
+label_Satelite = tk.Label(window, text='Data:', bg='#77C3EC', font=('Arial', 18))
+label_Satelite.place(x=200, y=750)
+label_Sat = tk.Label(window, text='Satelites', bg='#77C3EC', font=('Arial', 18))
+label_Sat.place(x=25, y=750)
+label_Speed = tk.Label(window, text='Data:', bg='#77C3EC', font=('Arial', 18))
+label_Speed.place(x=200, y=700)
+label_Spd = tk.Label(window, text='Speed', bg='#77C3EC', font=('Arial', 18))
+label_Spd.place(x=25, y=700)
+label_Pitch = tk.Label(window, text='Data:', bg='#77C3EC', font=('Arial', 18))
+label_Pitch.place(x=200, y=650)
+label_Ptch = tk.Label(window, text='Pitch', bg='#77C3EC', font=('Arial', 18))
+label_Ptch.place(x=25, y=650)
+label_Roll = tk.Label(window, text='Data:', bg='#77C3EC', font=('Arial', 18))
+label_Roll.place(x=200, y=600)
+label_Rl = tk.Label(window, text='Roll', bg='#77C3EC', font=('Arial', 18))
+label_Rl.place(x=25, y=600)
+#Class vir popup window for Mapping
+class IntegerInputDialog(tk.simpledialog.Dialog):
+    def init(self, parent, title=None):
+        self.value = None
+        super().init(parent, title)
+
+    def body(self, master):
+        self.entry = tk.Entry(master)
+        self.entry.pack()
+
+    def validate(self):
+        try:
+            self.value = int(self.entry.get())
+            return True
+        except ValueError:
+            messagebox.showwarning("Invalid Input", "Please enter a valid integer.")
+            return False
+#Function to open Dialog box for mapping       
+def open_dialog():
+            dialog = IntegerInputDialog(window, "Enter INteger")
+
+            if dialog.value is not None:
+                value = dialog.value
+                messagebox.showinfo("Result", f"You have entered {value}")
+                try:
+                    GetMap(value)
+                except:
+                    print("No serial found")
+
+def show_popup():
+    messagebox.showinfo("Serial Not Available", "Serial not available PLUG IN THE RF RECEIVER")
+# Create a label widget for the video feed
+cap = cv2.VideoCapture(0)
+width, height = 960, 720 #Width and height of camera
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, width) 
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
+
+
+
+style = ttk.Style()
+style.configure('TButton', font=('Arial', 14,'bold',),background='#77C3EC')
+# Create a button to open the camera in the GUI app
+
+try:
+    Update_lbl()
+except:
+    show_popup()
+window.mainloop()
+
+# Run the main event loop
+#window.mainloop()
