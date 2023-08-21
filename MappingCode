@@ -1,0 +1,18 @@
+The following is code that mapped out a set area, The robot will travell in a grid like pattern, and then will send the collected data to the GUI to display a 3D map of the terrain that the robot travelled.
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import interpolate
+
+ax = plt.axes(projection = "3d")
+
+def plot(n, arr):
+    x_data = np.arange(0, n, 1)
+    y_data = np.arange(0, n, 1)
+    X, Y = np.meshgrid(x_data, y_data)
+
+    Z = arr
+
+    Z_I = interpolate.interp2d(x_data, y_data, Z, kind="cubic")
+    Xnew =np.linspace(0, n, 10)
+
